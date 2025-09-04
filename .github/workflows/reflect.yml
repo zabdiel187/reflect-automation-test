@@ -1,0 +1,56 @@
+name: Reflect E2E
+on:
+  pull_request:            # run on every PR (change to `push` if you prefer)
+    branches: [ "main" ]
+
+jobs:
+  run-reflect:
+    runs-on: ubuntu-latest
+
+    env:
+      SUITE_ID: "0-zabs-github-test"   # e.g. regression-tests
+
+    steps:
+      - name: Install jq (JSON parser)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Trigger Reflect suite (and capture executionId)
+        id: trigger
+        run: |
+          # Build payload so Reflect can post PR status checks
+          PAYLOAD=$(jq -n --arg owner "${{ github.repository_owner }}" \
+                         --arg repo  "${{ github.event.repository.name }}" \
+                         --arg sha   "${{ github.event.pull_request.head.sha }}" \
+                         '{gitHub: {owner: $owner, repo: $repo, sha: $sha}}')
+
+          # Start the suite
+          RESP=$(curl -s -X POST \
+            -H "X-API-KEY: ${{ secrets.REFLECT_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "https://api.reflect.run/v1/suites/$SUITE_ID/executions")
+
+          echo "Response: $RESP"
+          echo "execution_id=$(echo "$RESP" | jq -r '.executionId')" >> "$GITHUB_OUTPUT"
+          echo "results_url=$(echo "$RESP" | jq -r '.url')" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for completion and fail if tests fail
+        run: |
+          exec_id="${{ steps.trigger.outputs.execution_id }}"
+          echo "Waiting on Reflect execution $exec_id ..."
+          for i in {1..60}; do
+            STATUS_JSON=$(curl -s -H "X-API-KEY: ${{ secrets.REFLECT_API_KEY }}" \
+              "https://api.reflect.run/v1/suites/$SUITE_ID/executions/$exec_id")
+            STATUS=$(echo "$STATUS_JSON" | jq -r '.status')
+            echo "Status: $STATUS"
+            if [ "$STATUS" = "passed" ]; then
+              echo "✅ Passed: ${{ steps.trigger.outputs.results_url }}"
+              exit 0
+            elif [ "$STATUS" = "failed" ] || [ "$STATUS" = "canceled" ]; then
+              echo "❌ Failed: ${{ steps.trigger.outputs.results_url }}"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for Reflect run $exec_id"
+          exit 1
