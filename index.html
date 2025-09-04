@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hot Market Trends</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .wrapper-trends {
+        margin: 0;
+        padding: 0px;
+      }
+
+      .wrapper-trends {
+        max-width: 100%;
+        margin: 0;
+        background: white;
+
+        backdrop-filter: blur(10px);
+        max-height: 90vh;
+        overflow: visible;
+        overflow-y: auto;
+      }
+
+      .banner-trends {
+        background: #121212;
+        color: white;
+        padding: 40px;
+        text-align: left;
+      }
+
+      .header-wrapper {
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .header-icon {
+        width: 40px;
+        aspect-ratio: 1/1;
+      }
+
+      .header-icon img {
+        width: 100%;
+        height: 100%;
+      }
+
+      .banner-trends h2 {
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-transform: titlecase;
+      }
+
+      .banner-trends p {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 24px;
+      }
+
+      .body-content-trends {
+        padding: 40px;
+      }
+
+      /* Phase Progress Indicator */
+      .phase-progress-trends {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        gap: 20px;
+      }
+
+      .phase-marker-trends {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .phase-marker-trends.current {
+        background: #29bf12;
+        color: white;
+      }
+
+      .phase-marker-trends.pending {
+        background: #e5e7eb;
+        color: #6b7280;
+      }
+
+      .phase-marker-trends.finished {
+        background: #29bf12;
+        color: white;
+      }
+
+      /* Phase Content */
+      .phase-content-trends {
+        display: none;
+        animation: slideIn 0.5s ease-in-out;
+      }
+
+      .phase-content-trends.current {
+        display: block;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .phase-banner-trends {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .phase-symbol-trends {
+        width: 60px;
+        height: 60px;
+        background: #29bf12;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        font-size: 1.5rem;
+      }
+
+      .phase-heading-trends {
+        flex: 1;
+      }
+
+      .phase-heading-trends h2 {
+        color: #29bf12;
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+      }
+
+      .phase-heading-trends p {
+        color: #6b7280;
+        font-size: 1rem;
+      }
+
+      /* Selection Cards */
+      .selection-grid-trends {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .choice-card-trends {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .choice-card-trends:hover {
+        border-color: #29bf12;
+        transform: translateY(-2px);
+      }
+
+      .choice-card-trends.picked {
+        border-color: #29bf12;
+        background: #f0fdf4;
+      }
+
+      .choice-card-trends.picked::after {
+        content: "✓";
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 25px;
+        height: 25px;
+        background: #29bf12;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .choice-symbol-trends {
+        width: 40px;
+        height: 40px;
+        background: #1f2937;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .choice-title-trends {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+      }
+
+      .choice-details-trends {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      /* Custom Input */
+      .custom-choice-trends {
+        grid-column: 1 / -1;
+      }
+
+      .custom-field-trends {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .custom-field-trends:focus {
+        outline: none;
+        border-color: #29bf12;
+      }
+
+      /* Navigation Buttons */
+      .phase-controls-trends {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 20px;
+      }
+
+      .control-button-trends {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .control-button-trends.main {
+        background: #29bf12;
+        color: white;
+      }
+
+      .control-button-trends.main:hover {
+        background: #29bf12;
+        transform: translateY(-1px);
+      }
+
+      .control-button-trends.alt {
+        background: #29bf12;
+        color: white;
+      }
+
+      .control-button-trends.alt:hover {
+        background: #29bf12;
+        color: white;
+      }
+
+      .control-button-trends:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Generate Section */
+      .analysis-section-trends {
+        text-align: center;
+      }
+
+      .analysis-button-trends {
+        background-color: #29bf12 !important;
+        color: white !important;
+        border: none;
+        padding: 16px 40px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .analysis-button-trends:hover {
+        transform: translateY(-2px);
+      }
+
+      .analysis-button-trends:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Loading and Results */
+      .processing-trends {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+
+      .processing-spinner-trends {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #29bf12;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: rotate 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .output-section-trends {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 30px;
+        display: none;
+      }
+
+      .output-section-trends h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+      }
+
+      .trend-card-trends {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #29bf12;
+      }
+
+      .trend-headline-trends {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+      }
+
+      .trend-content-trends {
+        color: #6c757d;
+        line-height: 1.5;
+      }
+
+      .alert-message-trends {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .contactForm {
+        background-color: black;
+        width: 100%;
+        padding: 50px;
+        gap: 20px;
+        margin: 0;
+        display: none;
+      }
+
+      .contactForm button {
+        margin-top: 20px;
+      }
+
+      .contactForm.active {
+        display: block;
+      }
+
+      .contactForm h3 {
+        color: #29bf12;
+      }
+
+      .contactForm input,
+      .contactForm textarea {
+        border: 1px solid #29bf12;
+        border-radius: 25px;
+        background-color: black;
+        color: white;
+      }
+
+      .contactForm button {
+        background-color: #29bf12;
+        color: black;
+      }
+
+      @media (max-width: 768px) {
+        .wrapper-trends {
+          border-radius: 40px;
+          overflow: visible;
+        }
+
+        .banner-trends {
+          padding: 30px 20px;
+          background: white;
+          color: black;
+          padding-top: 60px;
+          border-radius: 40px;
+        }
+
+        .banner-trends h1 {
+          font-size: 2rem;
+        }
+
+        .body-content-trends {
+          padding: 20px;
+        }
+
+        .selection-grid-trends {
+          grid-template-columns: 1fr;
+        }
+
+        .phase-progress-trends {
+          gap: 10px;
+        }
+
+        .phase-marker-trends {
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+
+        .wrapper-trends {
+          max-height: none;
+          height: fit-content;
+          overflow-y: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper-trends">
+      <div class="mobile-header-title">
+        <div class="greenBG">
+          <div class="blackBG">
+            <img
+              src="https://luckietwodev.wpenginepowered.com/wp-content/uploads/2025/07/image.svg"
+              alt="prompt icon"
+            />
+          </div>
+        </div>
+        <div class="mobile-prompt">
+          <h2>Hot Market Trends</h2>
+          <p>See whats most popular</p>
+        </div>
+      </div>
+      <div class="banner-trends">
+        <div class="header-wrapper">
+          <div class="header-icon">
+            <img
+              src="https://luckietwodev.wpenginepowered.com/wp-content/uploads/2025/07/image.svg"
+              alt="prompt icon"
+            />
+          </div>
+          <h2>Hot Market Trends</h2>
+        </div>
+        <p>
+          Stay ahead of the curve with real-time market insights. Discover
+          emerging trends, analyze industry shifts, and learn how Luckie and Co.
+          can help your brand capitalize on the next big opportunity in your
+          market.
+        </p>
+      </div>
+
+      <div class="body-content-trends">
+        <!-- Phase 1: Industry Domain -->
+        <div class="phase-content-trends current" data-phase="1">
+          <div class="phase-banner-trends">
+            <div class="phase-heading-trends">
+              <h2>Select Your Industry Domain</h2>
+              <p>
+                Choose the industry you want to analyze for hot market trends
+              </p>
+            </div>
+          </div>
+
+          <div class="selection-grid-trends">
+            <div
+              class="choice-card-trends"
+              data-value="Technology & Software - AI, SaaS, cybersecurity, mobile apps"
+            >
+              <div class="choice-symbol-trends">💻</div>
+              <div class="choice-title-trends">Technology & Software</div>
+              <div class="choice-details-trends">
+                AI, SaaS, cybersecurity, mobile apps
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Healthcare & Wellness - Telemedicine, fitness tech, mental health"
+            >
+              <div class="choice-symbol-trends">🏥</div>
+              <div class="choice-title-trends">Healthcare & Wellness</div>
+              <div class="choice-details-trends">
+                Telemedicine, fitness tech, mental health
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Financial Services - Fintech, crypto, digital banking"
+            >
+              <div class="choice-symbol-trends">💳</div>
+              <div class="choice-title-trends">Financial Services</div>
+              <div class="choice-details-trends">
+                Fintech, crypto, digital banking
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Retail & E-commerce - Online shopping, sustainability, personalization"
+            >
+              <div class="choice-symbol-trends">🛍️</div>
+              <div class="choice-title-trends">Retail & E-commerce</div>
+              <div class="choice-details-trends">
+                Online shopping, sustainability, personalization
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Food & Beverage - Plant-based, delivery services, sustainable packaging"
+            >
+              <div class="choice-symbol-trends">🍽️</div>
+              <div class="choice-title-trends">Food & Beverage</div>
+              <div class="choice-details-trends">
+                Plant-based, delivery services, sustainable packaging
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Real Estate & Construction - PropTech, smart buildings, remote work impact"
+            >
+              <div class="choice-symbol-trends">🏠</div>
+              <div class="choice-title-trends">Real Estate & Construction</div>
+              <div class="choice-details-trends">
+                PropTech, smart buildings, remote work impact
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Automotive & Transportation - Electric vehicles, autonomous driving, mobility services"
+            >
+              <div class="choice-symbol-trends">🚗</div>
+              <div class="choice-title-trends">Automotive & Transportation</div>
+              <div class="choice-details-trends">
+                Electric vehicles, autonomous driving, mobility services
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Entertainment & Media - Streaming, gaming, social platforms, content creation"
+            >
+              <div class="choice-symbol-trends">🎬</div>
+              <div class="choice-title-trends">Entertainment & Media</div>
+              <div class="choice-details-trends">
+                Streaming, gaming, social platforms, content creation
+              </div>
+            </div>
+
+            <div class="choice-card-trends custom-choice-trends">
+              <div class="choice-symbol-trends">✏️</div>
+              <div class="choice-title-trends">Custom Industry</div>
+              <input
+                type="text"
+                class="custom-field-trends"
+                placeholder="Specify your industry domain..."
+                data-category="domain-custom"
+              />
+            </div>
+          </div>
+
+          <div class="phase-controls-trends">
+            <div></div>
+            <button class="control-button-trends main" onclick="advancePhase()">
+              Next Step
+            </button>
+          </div>
+
+          <!-- Phase Progress -->
+          <div class="phase-progress-trends">
+            <div class="phase-marker-trends current" data-phase="1">1</div>
+            <div class="phase-marker-trends pending" data-phase="2">2</div>
+          </div>
+        </div>
+
+        <!-- Phase 2: Geographic Focus -->
+        <div class="phase-content-trends" data-phase="2">
+          <div class="phase-banner-trends">
+            <div class="phase-heading-trends">
+              <h2>Choose Geographic Focus</h2>
+              <p>Select the market region you want to analyze</p>
+            </div>
+          </div>
+
+          <div class="selection-grid-trends">
+            <div
+              class="choice-card-trends"
+              data-value="Global Markets - Worldwide trends and opportunities"
+            >
+              <div class="choice-symbol-trends">🌎</div>
+              <div class="choice-title-trends">Global Markets</div>
+              <div class="choice-details-trends">
+                Worldwide trends and opportunities
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="North America - USA, Canada, Mexico market trends"
+            >
+              <div class="choice-symbol-trends">🇺🇸</div>
+              <div class="choice-title-trends">North America</div>
+              <div class="choice-details-trends">
+                USA, Canada, Mexico market trends
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Europe - EU market dynamics and emerging opportunities"
+            >
+              <div class="choice-symbol-trends">🇪🇺</div>
+              <div class="choice-title-trends">Europe</div>
+              <div class="choice-details-trends">
+                EU market dynamics and emerging opportunities
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Asia-Pacific - China, India, Japan, Southeast Asia growth markets"
+            >
+              <div class="choice-symbol-trends">🌏</div>
+              <div class="choice-title-trends">Asia-Pacific</div>
+              <div class="choice-details-trends">
+                China, India, Japan, Southeast Asia growth markets
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Latin America - Brazil, Argentina, Chile emerging markets"
+            >
+              <div class="choice-symbol-trends">🌎</div>
+              <div class="choice-title-trends">Latin America</div>
+              <div class="choice-details-trends">
+                Brazil, Argentina, Chile emerging markets
+              </div>
+            </div>
+
+            <div
+              class="choice-card-trends"
+              data-value="Middle East & Africa - UAE, Saudi Arabia, South Africa growth regions"
+            >
+              <div class="choice-symbol-trends">🌍</div>
+              <div class="choice-title-trends">Middle East & Africa</div>
+              <div class="choice-details-trends">
+                UAE, Saudi Arabia, South Africa growth regions
+              </div>
+            </div>
+
+            <div class="choice-card-trends custom-choice-trends">
+              <div class="choice-symbol-trends">✏️</div>
+              <div class="choice-title-trends">Custom Region</div>
+              <input
+                type="text"
+                class="custom-field-trends"
+                placeholder="Specify your target region..."
+                data-category="location-custom"
+              />
+            </div>
+          </div>
+
+          <div class="phase-controls-trends">
+            <button class="control-button-trends alt" onclick="previousPhase()">
+              Previous
+            </button>
+            <div class="analysis-section-trends">
+              <button id="analyzeTrendsBtn" class="analysis-button-trends">
+                Analyze Market Trends
+              </button>
+            </div>
+          </div>
+
+          <!-- Phase Progress -->
+          <div class="phase-progress-trends">
+            <div class="phase-marker-trends finished" data-phase="1">1</div>
+            <div class="phase-marker-trends current" data-phase="2">2</div>
+          </div>
+        </div>
+
+        <!-- Processing State -->
+        <div id="processingTrends" class="processing-trends">
+          <div class="processing-spinner-trends"></div>
+          <p>
+            AI is analyzing current market trends and generating insights for
+            Luckie and Co...
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="alertMessageTrends" class="alert-message-trends"></div>
+
+        <!-- Results Section -->
+        <div id="outputSectionTrends" class="output-section-trends">
+          <h3>📈 Market Trends Analysis</h3>
+          <div id="trendsContainer"></div>
+        </div>
+      </div>
+      <div class="contactForm" id="contactForm">
+        <h3>Contact us to explore more about your solutions</h3>
+        <form action="/submit" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Your Name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Your Email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              placeholder="Your Message"
+              rows="5"
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
